@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 public class UserDTO {
 
     private Long id;
-    @Email(message = "Email inválido!")
+    @Email(message = "Email inválido")
     private String email;
     @Length(min = 3, max = 50, message = "O nome deve conter entre 50 e 3 caracteres")
     private String name;

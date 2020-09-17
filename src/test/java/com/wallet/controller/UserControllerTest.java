@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wallet.dto.UserDTO;
 import com.wallet.entity.User;
 import com.wallet.service.UserService;
+import org.hibernate.tool.schema.internal.exec.ScriptTargetOutputToFile;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.BDDMockito;
@@ -20,12 +21,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import javax.print.attribute.standard.MediaSize;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 public class UserControllerTest {
 
+    private static final Long ID = 1L;
     private static final String EMAIL = "email@teste.com";
     private static final String NAME = "User Test";
     private static final String PASSWORD = "123456";
@@ -41,15 +45,30 @@ public class UserControllerTest {
     public void testSave() throws Exception {
 
         BDDMockito.given(service.save(Mockito.any(User.class))).willReturn(getMockUser());
-        mvc.perform(MockMvcRequestBuilders.post(URL).content(getJsonPayload())
+        mvc.perform(MockMvcRequestBuilders.post(URL).content(getJsonPayload(ID, EMAIL, NAME, PASSWORD))
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON))
-            .andExpect(MockMvcResultMatchers.status().isCreated());
+        .andExpect(MockMvcResultMatchers.status().isCreated())
+        .andExpect(MockMvcResultMatchers.jsonPath("$.data.id").value(ID))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.email").value(EMAIL))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.name").value(NAME))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.password").value(PASSWORD));
 
+    }
+
+    @Test
+    public void testSaveInvalidUser() throws JsonProcessingException, Exception {
+
+        mvc.perform(MockMvcRequestBuilders.post(URL).content(getJsonPayload(ID, "email", NAME, PASSWORD))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errors[0]").value("Email inválido"));
     }
 
     public User getMockUser() {
         User user = new User();
+        user.setId(ID);
         user.setEmail(EMAIL);
         user.setName(NAME);
         user.setPassword(PASSWORD);
@@ -57,11 +76,12 @@ public class UserControllerTest {
         return user;
     }
 
-    public String getJsonPayload() throws JsonProcessingException {
+    public String getJsonPayload(Long id, String email, String name, String passaword) throws JsonProcessingException {
         UserDTO userDto = new UserDTO();
-        userDto.setEmail(EMAIL);
-        userDto.setName(NAME);
-        userDto.setPassword(PASSWORD);
+        userDto.setEmail(email);
+        userDto.setName(name);
+        userDto.setPassword(passaword);
+        userDto.setId(id);
 
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writeValueAsString(userDto);
