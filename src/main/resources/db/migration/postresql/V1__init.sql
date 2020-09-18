@@ -1,7 +1,7 @@
 create table users(
 id integer auto_increment,
 name varchar(50),
-password varchar(50),
+password varchar(500),
 email varchar(100),
 primary key (id));
 

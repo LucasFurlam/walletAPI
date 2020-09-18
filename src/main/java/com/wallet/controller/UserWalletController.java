@@ -46,7 +46,7 @@ public class UserWalletController {
         UserWallet userWallet = new UserWallet();
 
         User user = new User();
-        user.setId(userWalletDTO.getId());
+        user.setId(userWalletDTO.getUsers());
 
         Wallet wallet = new Wallet();
         wallet.setId(userWalletDTO.getWallet());
