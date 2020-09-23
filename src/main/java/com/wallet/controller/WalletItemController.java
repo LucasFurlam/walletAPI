@@ -9,6 +9,8 @@ import com.wallet.service.UserWalletService;
 import com.wallet.service.WalletItemService;
 import com.wallet.util.Util;
 import com.wallet.util.enums.TypeEnum;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -34,6 +36,8 @@ public class WalletItemController {
 
     @Autowired
     private UserWalletService userWalletService;
+
+    private static Logger log = LoggerFactory.getLogger(WalletItemController.class);
 
     @PostMapping
     public ResponseEntity<Response<WalletItemDTO>> create(@Valid @RequestBody WalletItemDTO walletItemDTO, BindingResult bindingResult) {
@@ -75,6 +79,8 @@ public class WalletItemController {
 
     @GetMapping(value = "/type/{wallet}")
     public ResponseEntity<Response<List<WalletItemDTO>>> findByWalletIdAndType(@PathVariable("wallet") Long wallet, @RequestParam("type") String type) {
+
+        log.info("Buscando por carteira {} e tipo {}", wallet, type);
 
         Response<List<WalletItemDTO>> response = new Response<>();
         List<WalletItem> list = service.findByWalletAndType(wallet, TypeEnum.getEnum(type));
